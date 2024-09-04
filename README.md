@@ -24,3 +24,7 @@ To github.com:volkajaizier/devops-r-d.git
 7. Create feature-2 branch
 8. Add script repeater.py
 9. Push changes to feature-2 branch
+10. Create a pull request to merge feature-2 in master
+11. Pull request successfully merged and closed
+12. Checkout to master
+13. git pull origin master to local repository
