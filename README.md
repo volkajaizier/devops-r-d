@@ -5,4 +5,5 @@ Learning DevOps practises
 2. Push the script return.py
 3. Create branch feature-1
 4. Change script return and README.md
+5. Push changes
 
