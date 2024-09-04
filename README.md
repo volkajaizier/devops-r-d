@@ -21,3 +21,6 @@ vladv@vvovk-lp:~/devops/devops-r-d$ git push origin master
 Total 0 (delta 0), reused 0 (delta 0)
 To github.com:volkajaizier/devops-r-d.git
    ba30e42..e30ab3a  master -> master
+7. Create feature-2 branch
+8. Add script repeater.py
+9. Push changes to feature-2 branch
