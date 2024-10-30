@@ -1,0 +1,94 @@
+1. Create a new project directory:
+mkdir multi-container-app
+cd multi-container-app
+2.Create docker-compose.yml file
+3.Inside the multi-container-app directory, create a subdirectory to store the index.html file web-data
+4.Run the application:
+PS C:\Users\vvovk\VCS_Project\The_Modern_Python_3_Bootcamp\lecture-17\multi-container-app> docker compose up -d
+[+] Running 30/11
+ ✔ cache Pulled                                                                                                                                       10.5s 
+ ✔ db Pulled                                                                                                                                          12.8s 
+ ✔ web Pulled                                                                                                                                         11.1s 
+[+] Running 6/6
+ ✔ Network multi-container-app_appnet     Created                                                                                                      0.0s 
+ ✔ Volume "multi-container-app_db-data"   Created                                                                                                      0.0s 
+ ✔ Volume "multi-container-app_web-data"  Created                                                                                                      0.0s 
+ ✔ Container multi-container-app-db-1     Started                                                                                                      1.1s 
+ ✔ Container multi-container-app-web-1    Started                                                                                                      1.3s 
+ ✔ Container multi-container-app-cache-1  Started            
+5.Check the status
+docker-compose ps
+NAME                          IMAGE      COMMAND                  SERVICE   CREATED         STATUS         PORTS
+multi-container-app-cache-1   redis      "docker-entrypoint.s…"   cache     9 minutes ago   Up 9 minutes   6379/tcp
+multi-container-app-db-1      postgres   "docker-entrypoint.s…"   db        9 minutes ago   Up 9 minutes   5432/tcp
+multi-container-app-web-1     nginx      "/docker-entrypoint.…"   web       9 minutes ago   Up 9 minutes   0.0.0.0:8080->80/tcp
+6.Check the Welcome message http://localhost:8080 - 
+Hello from Docker!
+
+P.S - it didn`t work first because I mounted web-data instead of ./web-data
+
+6.View created networks and volumes:
+
+PS C:\Users\vvovk\VCS_Project\The_Modern_Python_3_Bootcamp\lecture-17\multi-container-app> docker network ls
+NETWORK ID     NAME                         DRIVER    SCOPE
+69071990bbf7   bridge                       bridge    local
+1a6bb19c5528   host                         host      local
+d54b22d63edb   multi-container-app_appnet   bridge    local
+d89610028272   none                         null      local
+
+PS C:\Users\vvovk\VCS_Project\The_Modern_Python_3_Bootcamp\lecture-17\multi-container-app> docker volume ls
+DRIVER    VOLUME NAME
+local     3ee5f5dc6bb38537c2176e84fe1f9c4471cc4b3fea01ed336ca31b6f59aab01e
+local     d6e4914a186bac57567094b27174295794a145d27677b6440076c7fe86bef22c
+local     f1549babaa4948b0fe7d7c785beb665b940fdd39e3378536dfe543e61a92ec86
+local     multi-container-app_db-data
+local     multi-container-app_web-data
+
+7.Connection to db (also can use multi-container-app-db-1 as the name)
+
+PS C:\Users\vvovk\VCS_Project\The_Modern_Python_3_Bootcamp\lecture-17\multi-container-app> docker exec -it 33f34aa0fd1d psql -U postgres     
+psql (17.0 (Debian 17.0-1.pgdg120+1))
+Type "help" for help.
+
+postgres=#
+
+8.Scale the web service to 3 instances(got the error):
+docker compose up -d --scale web=3
+[+] Running 4/5
+ ✔ Container multi-container-app-cache-1  Running                                                                                                      0.0s 
+ ✔ Container multi-container-app-db-1     Running                                                                                                      0.0s 
+ ✔ Container multi-container-app-web-1    Running                                                                                                      0.0s 
+ ✔ Container multi-container-app-web-3    Created                                                                                                      0.2s 
+ - Container multi-container-app-web-2    Starting                                                                                                     0.4s 
+Error response from daemon: driver failed programming external connectivity on endpoint multi-container-app-web-2 (4588aa78f7e4a1ba4e5bcf813f55588eb5856eebf28d46b6baf13193a6438238): Bind for 0.0.0.0:8080 failed: port is already allocated
+
+To resolve this added load balancer traefik
+
+docker compose up -d              
+[+] Running 5/5
+ ✔ traefik Pulled                                                                                                                                      4.2s 
+   ✔ f56be85fc22e Download complete                                                                                                                    0.9s 
+   ✔ afaddc85d79e Download complete                                                                                                                    1.5s 
+   ✔ 8ff733a62a12 Download complete                                                                                                                    0.6s 
+   ✔ d055169f9c6f Download complete                                                                                                                    0.3s 
+[+] Running 5/5
+ ✔ Network multi-container-app_appnet       Created                                                                                                    0.1s 
+ ✔ Container multi-container-app-web-1      Started                                                                                                    1.3s 
+ ✔ Container multi-container-app-traefik-1  Started                                                                                                    1.3s 
+ ✔ Container multi-container-app-db-1       Started                                                                                                    1.3s 
+ ✔ Container multi-container-app-cache-1    Started                                                                                                    1.3s 
+PS C:\Users\vvovk\VCS_Project\The_Modern_Python_3_Bootcamp\lecture-17\multi-container-app> docker compose up -d --scale web=3
+[+] Running 6/6
+ ✔ Container multi-container-app-traefik-1  Started                                                                                                    0.7s 
+ ✔ Container multi-container-app-db-1       Running                                                                                                    0.0s 
+ ✔ Container multi-container-app-web-1      Running                                                                                                    0.0s 
+ ✔ Container multi-container-app-cache-1    Running                                                                                                    0.0s 
+ ✔ Container multi-container-app-web-2      Started                                                                                                    0.9s 
+ ✔ Container multi-container-app-web-3      Started                                                                                                    0.6s 
+PS C:\Users\vvovk\VCS_Project\The_Modern_Python_3_Bootcamp\lecture-17\multi-container-app> docker compose ps
+NAME                          IMAGE      COMMAND                  SERVICE   CREATED          STATUS          PORTS
+multi-container-app-cache-1   redis      "docker-entrypoint.s…"   cache     2 minutes ago    Up 2 minutes    6379/tcp
+multi-container-app-db-1      postgres   "docker-entrypoint.s…"   db        2 minutes ago    Up 2 minutes    5432/tcp
+multi-container-app-web-1     nginx      "/docker-entrypoint.…"   web       2 minutes ago    Up 2 minutes    80/tcp
+multi-container-app-web-2     nginx      "/docker-entrypoint.…"   web       15 seconds ago   Up 13 seconds   80/tcp
+multi-container-app-web-3     nginx      "/docker-entrypoint.…"   web       15 seconds ago   Up 14 seconds   80/tcp
