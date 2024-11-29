@@ -1,0 +1,234 @@
+I`ve created a virtual machine in vagrant and install mysql there
+Vagrantfile is also pushed here
+
+Then I`ve create an msyql script which 
+
+1.Create the SchoolDB database
+2.Create the Institutions table
+3.Create the Classes table
+4.Create the Children table
+5.Create the Parents table
+
+after that it insert data into those tables
+
+1.Insert sample data into Institutions
+2.Insert sample data into Classes
+3.Insert sample data into Children
+4.Insert sample data into Parents
+
+then we verifying if data created with select commands
+
+after that we starting addittional task and anonymize the data
+
+1.Anonymize Children Table: Replace first and last names with "Child" and "Anonymous"
+2.Anonymize Parents Table: Replace first and last names with "Parent1", "Parent2", etc.
+3.Anonymize Institutions Table: Replace real names with "Institution1", "Institution2", etc.
+4.Anonymize financial data: Replace tuition_fee with random values within a reasonable range (e.g., between 1000 and 3000)
+
+then we verifying if data anonymized with select commands
+
+login to mysql
+run script with command below:
+mysql> SOURCE /vagrant_shared/SchoolDB.sql
+
+output:
+
+Query OK, 1 row affected (0.02 sec)
+
+Database changed
+Query OK, 0 rows affected (0.07 sec)
+
+Query OK, 0 rows affected (0.09 sec)
+
+Query OK, 0 rows affected (0.07 sec)
+
+Query OK, 0 rows affected (0.10 sec)
+
+Query OK, 3 rows affected (0.02 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
+Query OK, 3 rows affected (0.01 sec)
+Records: 3  Duplicates: 0  Warnings: 0
+
++----------------+---------------------+------------------+---------------------------+
+| institution_id | institution_name    | institution_type | address                   |
++----------------+---------------------+------------------+---------------------------+
+|              1 | Sunrise School      | School           | 123 Main St, Cityville    |
+|              2 | Bright Kindergarten | Kindergarten     | 456 Maple Ave, Townsville |
+|              3 | Green High School   | School           | 789 Oak Rd, Cityville     |
++----------------+---------------------+------------------+---------------------------+
+3 rows in set (0.00 sec)
+
++----------+------------+----------------+-----------------------+
+| class_id | class_name | institution_id | direction             |
++----------+------------+----------------+-----------------------+
+|        1 | Grade 1    |              1 | Mathematics           |
+|        2 | Preschool  |              2 | Language Studies      |
+|        3 | Grade 9    |              3 | Biology and Chemistry |
++----------+------------+----------------+-----------------------+
+3 rows in set (0.00 sec)
+
++----------+------------+-----------+------------+---------------+-----+----------------+----------+
+| child_id | first_name | last_name | birth_date | year_of_entry | age | institution_id | class_id |
++----------+------------+-----------+------------+---------------+-----+----------------+----------+
+|        1 | Alice      | Johnson   | 2015-05-10 |          2021 |   9 |              1 |        1 |
+|        2 | Tom        | Smith     | 2018-08-25 |          2023 |   6 |              2 |        2 |
+|        3 | Emily      | Davis     | 2010-12-12 |          2019 |  14 |              3 |        3 |
++----------+------------+-----------+------------+---------------+-----+----------------+----------+
+3 rows in set (0.00 sec)
+
++-----------+------------+-----------+----------+-------------+
+| parent_id | first_name | last_name | child_id | tuition_fee |
++-----------+------------+-----------+----------+-------------+
+|         1 | Michael    | Johnson   |        1 |     1500.00 |
+|         2 | Sarah      | Smith     |        2 |     2000.00 |
+|         3 | David      | Davis     |        3 |     1200.00 |
++-----------+------------+-----------+----------+-------------+
+3 rows in set (0.00 sec)
+
+Query OK, 3 rows affected (0.01 sec)
+Rows matched: 3  Changed: 3  Warnings: 0
+
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 3 rows affected, 2 warnings (0.01 sec)
+Rows matched: 3  Changed: 3  Warnings: 2
+
+Query OK, 0 rows affected (0.00 sec)
+
+Query OK, 3 rows affected, 1 warning (0.01 sec)
+Rows matched: 3  Changed: 3  Warnings: 1
+
+Query OK, 3 rows affected (0.01 sec)
+Rows matched: 3  Changed: 3  Warnings: 0
+
++----------+------------+-----------+------------+---------------+-----+----------------+----------+
+| child_id | first_name | last_name | birth_date | year_of_entry | age | institution_id | class_id |
++----------+------------+-----------+------------+---------------+-----+----------------+----------+
+|        1 | Child      | Anonymous | 2015-05-10 |          2021 |   9 |              1 |        1 |
+|        2 | Child      | Anonymous | 2018-08-25 |          2023 |   6 |              2 |        2 |
+|        3 | Child      | Anonymous | 2010-12-12 |          2019 |  14 |              3 |        3 |
++----------+------------+-----------+------------+---------------+-----+----------------+----------+
+3 rows in set (0.00 sec)
+
++-----------+------------+-----------+----------+-------------+
+| parent_id | first_name | last_name | child_id | tuition_fee |
++-----------+------------+-----------+----------+-------------+
+|         1 | Parent1    | Parent2   |        1 |     1104.00 |
+|         2 | Parent3    | Parent4   |        2 |     2287.00 |
+|         3 | Parent5    | Parent6   |        3 |     1125.00 |
++-----------+------------+-----------+----------+-------------+
+3 rows in set (0.00 sec)
+
++----------------+------------------+------------------+---------------------------+
+| institution_id | institution_name | institution_type | address                   |
++----------------+------------------+------------------+---------------------------+
+|              1 | Institution1     | School           | 123 Main St, Cityville    |
+|              2 | Institution2     | Kindergarten     | 456 Maple Ave, Townsville |
+|              3 | Institution3     | School           | 789 Oak Rd, Cityville     |
++----------------+------------------+------------------+---------------------------+
+3 rows in set (0.00 sec)
+
+
+Make next reqests
+1.Get a list of all the children along with the institution they are in and their class track
+SELECT 
+    C.first_name, 
+    C.last_name, 
+    I.institution_name, 
+    CL.class_name, 
+    CL.direction
+FROM 
+    Children C
+JOIN 
+    Institutions I ON C.institution_id = I.institution_id
+JOIN 
+    Classes CL ON C.class_id = CL.class_id;
+
++------------+-----------+------------------+------------+-----------------------+
+| first_name | last_name | institution_name | class_name | direction             |
++------------+-----------+------------------+------------+-----------------------+
+| Child      | Anonymous | Institution1     | Grade 1    | Mathematics           |
+| Child      | Anonymous | Institution2     | Preschool  | Language Studies      |
+| Child      | Anonymous | Institution3     | Grade 9    | Biology and Chemistry |
++------------+-----------+------------------+------------+-----------------------+
+3 rows in set (0.00 sec)
+
+2.Get information about parents and their children along with tuition fees
+
+SELECT 
+    P.first_name AS parent_first_name,
+    P.last_name AS parent_last_name,
+    C.first_name AS child_first_name,
+    C.last_name AS child_last_name,
+    C.age AS child_age,
+    P.tuition_fee
+FROM 
+    Parents P
+JOIN 
+    Children C ON P.child_id = C.child_id;
+
++-------------------+------------------+------------------+-----------------+-----------+-------------+
+| parent_first_name | parent_last_name | child_first_name | child_last_name | child_age | tuition_fee |
++-------------------+------------------+------------------+-----------------+-----------+-------------+
+| Parent1           | Parent2          | Child            | Anonymous       |         9 |     1104.00 |
+| Parent3           | Parent4          | Child            | Anonymous       |         6 |     2287.00 |
+| Parent5           | Parent6          | Child            | Anonymous       |        14 |     1125.00 |
++-------------------+------------------+------------------+-----------------+-----------+-------------+
+3 rows in set (0.00 sec)
+
+3.Get a list of all institutions with addresses and the number of children studying in each institution
+SELECT 
+    I.institution_name,
+    I.address,
+    COUNT(c.child_id) AS number_of_children
+FROM 
+    Institutions I
+JOIN 
+    Children C ON I.institution_id = C.institution_id
+GROUP BY 
+    I.institution_id;
++------------------+---------------------------+--------------------+
+| institution_name | address                   | number_of_children |
++------------------+---------------------------+--------------------+
+| Institution1     | 123 Main St, Cityville    |                  1 |
+| Institution2     | 456 Maple Ave, Townsville |                  1 |
+| Institution3     | 789 Oak Rd, Cityville     |                  1 |
++------------------+---------------------------+--------------------+
+3 rows in set (0.00 sec)
+
+
+Create a backup:
+
+root@vagrant:/vagrant_shared# mysqldump SchoolDB > /vagrant_shared/SchoolDB_backup.sql
+
+Creata a new DB 
+go mysql
+
+mysql> CREATE DATABASE IF NOT EXISTS NewSchoolDB;
+Query OK, 1 row affected (0.02 sec)
+
+Restore the Backup to the New Database
+
+root@vagrant:/vagrant_shared# mysql NewSchoolDB < /vagrant_shared/SchoolDB_backup.sql 
+mysql> Use NewSchoolDB
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++-----------------------+
+| Tables_in_NewSchoolDB |
++-----------------------+
+| Children              |
+| Classes               |
+| Institutions          |
+| Parents               |
++-----------------------+
+4 rows in set (0.00 sec)
