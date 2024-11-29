@@ -1,0 +1,158 @@
+First I`ve run mongo in docker
+
+1.pull image
+docker pull mongo:7.0
+
+2. Run MongoDB in a Container
+
+docker run --name mongodb -d -p 27017:27017 -v ~/mongo-data:/data/db mongo:7.0
+
+3. installed MongoDb Compass and connected to it through the localhost conenction
+mongodb://localhost:27017
+
+command docker exec -it mongodb mongo - didn`t work
+OCI runtime exec failed: exec failed: unable to start container process: exec: "mongo": executable file not found in $PATH: unknown
+
+I tried to fix it with 
+vladv@vvovk-lp:~/devops$ docker exec -it mongodb bash
+root@408a8fad090b:/# apt-get update
+apt-get install -y mongodb-org-shell
+
+but it didn`t help
+
+So I used mongoshell in Compass
+
+created database with Compass
+
+Inserted Documents in clients Collection:
+
+db.clients.insertMany([
+  { client_id: 1, name: "John Doe", age: 28, email: "john.doe@example.com" },
+  { client_id: 2, name: "Jane Smith", age: 32, email: "jane.smith@example.com" },
+  { client_id: 3, name: "Sam Brown", age: 24, email: "sam.brown@example.com" }
+])
+
+output:
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('670bfffe2c71332b482c6167'),
+    '1': ObjectId('670bfffe2c71332b482c6168'),
+    '2': ObjectId('670bfffe2c71332b482c6169')
+  }
+}
+
+Insert Documents into memberships Collection:
+
+db.memberships.insertMany([
+  { membership_id: 1, client_id: 1, start_date: "2024-01-01", end_date: "2024-12-31", type: "Annual" },
+  { membership_id: 2, client_id: 2, start_date: "2024-03-01", end_date: "2024-09-01", type: "Semi-Annual" },
+  { membership_id: 3, client_id: 3, start_date: "2024-06-15", end_date: "2024-09-15", type: "Quarterly" }
+])
+
+output
+
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('670c009b2c71332b482c616a'),
+    '1': ObjectId('670c009b2c71332b482c616b'),
+    '2': ObjectId('670c009b2c71332b482c616c')
+  }
+}
+
+Insert Documents into workouts Collection:
+
+db.workouts.insertMany([
+  { workout_id: 1, description: "Cardio and endurance training", difficulty: "Medium" },
+  { workout_id: 2, description: "Strength training", difficulty: "Hard" },
+  { workout_id: 3, description: "Yoga and flexibility", difficulty: "Easy" }
+])
+
+
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('670c00bc2c71332b482c616d'),
+    '1': ObjectId('670c00bc2c71332b482c616e'),
+    '2': ObjectId('670c00bc2c71332b482c616f')
+  }
+}
+
+Insert Documents into trainers Collection:
+
+db.trainers.insertMany([
+  { trainer_id: 1, name: "Alex Johnson", specialization: "Cardio" },
+  { trainer_id: 2, name: "Emily Davis", specialization: "Strength training" },
+  { trainer_id: 3, name: "Michael Lee", specialization: "Yoga" }
+])
+
+{
+  acknowledged: true,
+  insertedIds: {
+    '0': ObjectId('670c00d02c71332b482c6170'),
+    '1': ObjectId('670c00d02c71332b482c6171'),
+    '2': ObjectId('670c00d02c71332b482c6172')
+  }
+}
+
+Verify Collection
+
+db.clients.find().pretty()
+{
+  _id: ObjectId('670bfffe2c71332b482c6167'),
+  client_id: 1,
+  name: 'John Doe',
+  age: 28,
+  email: 'john.doe@example.com'
+}
+{
+  _id: ObjectId('670bfffe2c71332b482c6168'),
+  client_id: 2,
+  name: 'Jane Smith',
+  age: 32,
+  email: 'jane.smith@example.com'
+}
+{
+  _id: ObjectId('670bfffe2c71332b482c6169'),
+  client_id: 3,
+  name: 'Sam Brown',
+  age: 24,
+  email: 'sam.brown@example.com'
+}
+
+Find All Customers Over 30 Years Old
+
+db.clients.find({ age: { $gt: 30 } }).pretty()
+
+
+{
+  _id: ObjectId('670bfffe2c71332b482c6168'),
+  client_id: 2,
+  name: 'Jane Smith',
+  age: 32,
+  email: 'jane.smith@example.com'
+}
+
+List Exercises with Moderate Difficulty
+
+db.workouts.find({ difficulty: "Medium" }).pretty()
+{
+  _id: ObjectId('670c00bc2c71332b482c616d'),
+  workout_id: 1,
+  description: 'Cardio and endurance training',
+  difficulty: 'Medium'
+}
+
+Show Membership Information for a Client with a Given client_id
+
+db.memberships.find({ client_id: 1 }).pretty()
+
+{
+  _id: ObjectId('670c009b2c71332b482c616a'),
+  membership_id: 1,
+  client_id: 1,
+  start_date: '2024-01-01',
+  end_date: '2024-12-31',
+  type: 'Annual'
+}
