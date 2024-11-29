@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  site:
+    image: vladv377350/vladvdevops:latest
+    deploy:
+      replicas: 3
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "80:80"
+    networks:
+      - mynet
+    secrets:
+      - my_secret
+
+networks:
+  mynet:
+    driver: overlay
+
+secrets:
+  my_secret:
+    external: true
