@@ -1,0 +1,20 @@
+- name: Configure all servers
+  hosts: all
+  become: true
+  roles:
+    - baseline
+  vars_files:
+    - roles/baseline/vars/secrets.yml
+
+- name: Configure ansible servers
+  hosts: ansible_ansible
+  become: true
+  roles:
+    - nginx
+
+
+- name: Configure firewall rules
+  hosts: all
+  become: true
+  roles:
+    - firewall

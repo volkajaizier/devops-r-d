@@ -1,0 +1,12 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - eu-west-3
+filters:
+  instance-state-name: running
+keyed_groups:
+  - key: tags.Group
+    prefix: ansible
+compose:
+  ansible_host: public_ip_address
+  ansible_user: ubuntu
+host_key_checking: false
