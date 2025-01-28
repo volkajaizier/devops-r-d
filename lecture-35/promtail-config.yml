@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: promtail-config
+  namespace: monitoring
+  labels:
+    app: promtail
+    component: log-collection
+  annotations:
+    description: "Configuration for Promtail to scrape logs and push to Loki."
+data:
+  promtail-config.yml: |
+    server:
+      http_listen_port: 3101
+      grpc_listen_port: 9095
+
+    positions:
+      filename: /var/log/positions.yaml
+
+    clients:
+      - url: http://loki:3100/loki/api/v1/push
+
+    scrape_configs:
+      # Scrape logs from Nginx ingress logs
+      - job_name: nginx-ingress-logs
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: nginx-ingress
+              host: $HOSTNAME
+              __path__: /var/log/nginx/access.log
+          - targets:
+              - localhost
+            labels:
+              job: nginx-ingress
+              host: $HOSTNAME
+              __path__: /var/log/nginx/error.log
+
+      # Scrape logs from Kubernetes nodes
+      - job_name: kubernetes-nodes
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - source_labels: [__address__]
+            target_label: instance
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: nodename
+
+      # Scrape logs from Kubernetes pods
+      - job_name: kubernetes-pods
+        pipeline_stages:
+          - json:
+              expressions:
+                level: level
+                msg: message
+          - regex:
+              expression: '^(?P<ts>[^ ]+) (?P<log>.*)$'
+          - timestamp:
+              source: ts
+              format: RFC3339
+          - labels:
+              level:
+              app:
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_container_name]
+            target_label: container
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: node
+
+      # Scrape logs from system journal (optional, if running systemd)
+      - job_name: journal-logs
+        static_configs:
+          - targets:
+              - localhost
+            labels:
+              job: system-journal
+              __path__: /var/log/journal/*/*.log
