@@ -1,0 +1,112 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: aws-presence
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: aws-register
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: aws-env-sensors-available
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: aws-shadow-update
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: aws-shadow-update
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: verne-webhooks
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: aws-cert-registered
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: connectivity-changes
+  namespace: prod
+  labels:
+    strimzi.io/cluster: kafka-cluster
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: 7200000
+    segment.bytes: 1073741824
+---

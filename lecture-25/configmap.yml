@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: website-config
+data:
+  index.html: |
+    <html>
+      <body>
+        <h1>Welcome to EKS</h1>
+      </body>
+    </html>
