@@ -1,0 +1,2 @@
+nodeSelector:
+  eks.amazonaws.com/nodegroup: eks-kafka

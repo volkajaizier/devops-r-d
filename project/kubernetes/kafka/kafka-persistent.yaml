@@ -1,0 +1,150 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka-cluster
+  namespace: prod
+spec:
+  entityOperator:
+    topicOperator:
+      resources:
+        limits:
+          cpu: 250m
+          memory: 250Mi
+        requests:
+          cpu: 200m
+          memory: 200Mi
+    userOperator:
+      resources:
+        limits:
+          cpu: 250m
+          memory: 250Mi
+        requests:
+          cpu: 200m
+          memory: 200Mi
+  kafka:
+    authorization:
+      superUsers:
+      - CN=kafkaUser
+      type: simple
+    config:
+      default.replication.factor: 3
+      inter.broker.protocol.version: '3.0'
+      log.message.format.version: '3.0'
+      min.insync.replicas: 2
+      num.io.threads: 16
+      num.replica.fetchers: 6
+      offsets.topic.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      transaction.state.log.replication.factor: 3
+    listeners:
+    - authentication:
+        type: scram-sha-512
+      name: plain
+      port: 9092
+      tls: false
+      type: internal
+    - authentication:
+        type: scram-sha-512
+      name: tls
+      port: 9093
+      tls: true
+      type: internal
+    - authentication:
+        type: tls
+      name: scaler
+      port: 9096
+      tls: true
+      type: internal
+    - authentication:
+        type: scram-sha-512
+      configuration:
+        bootstrap:
+          annotations:
+            service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: 'true'
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: kafka-access-logs-bucket
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: kafka-logs
+            service.beta.kubernetes.io/aws-load-balancer-internal: true
+        brokers:
+        - annotations:
+            service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: 'true'
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: kafka-access-logs-bucket
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: kafka-logs
+            service.beta.kubernetes.io/aws-load-balancer-internal: true
+          broker: 0
+        - annotations:
+            service.beta.kubernetes.io/aws-load-balancer-access-log-enabled: 'true'
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: kafka-access-logs-bucket
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: kafka-logs
+            service.beta.kubernetes.io/aws-load-balancer-internal: true
+          broker: 1
+        - annotations:
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-name: kafka-access-logs-bucket
+            service.beta.kubernetes.io/aws-load-balancer-access-log-s3-bucket-prefix: kafka-logs
+            service.beta.kubernetes.io/aws-load-balancer-internal: true
+          broker: 2
+      name: plain2
+      port: 9094
+      tls: true
+      type: loadbalancer
+    replicas: 3
+    storage:
+      type: jbod
+      volumes:
+      - class: gp3
+        deleteClaim: false
+        id: 0
+        size: 50Gi
+        type: persistent-claim
+    template:
+      pod:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node
+                  operator: In
+                  values:
+                  - kafka
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: strimzi.io/name
+                  operator: In
+                  values:
+                  - kafka-cluster-kafka
+              topologyKey: kubernetes.io/hostname
+    version: 3.0.0
+  kafkaExporter:
+    groupRegex: .*
+    topicRegex: prd.*|aws.*|ditto.*|telemetry.|resource-notifications|verne-webhooks|connectivity-changes
+  zookeeper:
+    replicas: 3
+    storage:
+      class: gp2
+      deleteClaim: false
+      size: 30Gi
+      type: persistent-claim
+    template:
+      pod:
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: node
+                  operator: In
+                  values:
+                  - kafka
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                  - key: strimzi.io/name
+                    operator: In
+                    values:
+                    - kafka-cluster-zookeeper
+                topologyKey: kubernetes.io/hostname
+              weight: 1

@@ -1,0 +1,136 @@
+version: '3.4'
+
+networks:
+  default:
+    driver: bridge
+  docker:
+    
+services:
+  redis:
+    image: redis:6.2-alpine
+    restart: always
+    networks:
+      - default
+      - docker
+    ports:
+      - 6379:6379
+
+  mysql:
+    container_name: mysql
+    platform: linux/amd64
+    image: mysql:5.7
+    user: 501:20
+    restart: always
+    networks:
+      - default
+      - docker
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_HOST=%
+    volumes:
+      - "./mysql/data:/var/lib/mysql"
+      - "./mysql/conf.d:/etc/mysql/conf.d"
+
+  tsdb:
+    container_name: tsdb
+    image: timescale/timescaledb-ha:pg12.20-ts2.11.2
+    restart: always
+    networks:
+      - default
+      - docker
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - TZ=UTC
+    volumes:
+      - ./tsdb-data:/var/lib/postgresql/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    expose:
+      - 2181
+    restart: always
+  
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    restart: always
+    depends_on:
+      - zookeeper
+    ports:
+      - 29092:29092
+    networks:
+      - default
+      - docker
+    expose:
+    - 9092
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_MINUTES: 60
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.4.0
+    container_name: kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "9091:8080"
+    restart: always
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+  vernemq:
+    container_name: vernemq
+    image: vernemq/vernemq
+    platform: linux/amd64
+    ports:
+      - 1883:1883
+      - 8888:8888
+      - 8880:8080
+    networks:
+      - default
+      - docker
+    volumes:
+      - ./vernemq.conf:/etc/vernemq/vernemq.conf
+
+  prometheus:
+    container_name: prometheus
+    image: quay.io/prometheus/prometheus:v2.36.1
+    volumes:
+      - ./prometheus-data:/prometheus/data
+      - ./prometheus.yml:/prometheus/prometheus.yml
+    command:
+      - '--storage.tsdb.retention.time=5m'
+    ports:
+      - 10090:9090
+    expose:
+      - 9090
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:8.5.13
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    ports:
+      - 10091:3000
+    environment:
+      #- GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-worldmap-panel,grafana-piechart-panel,digrich-bubblechart-panel
+      #- TZ=UTC
+      - GF_DASHBOARDS_MIN_REFRESH_INTERVAL=1s
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana-datatsources.yml:/etc/grafana/provisioning/datasources/datasource.yml

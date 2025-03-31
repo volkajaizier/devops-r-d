@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: prod
+spec:
+  selector:
+    app: grafana
+  ports:
+    - name: grafana
+      port: 3000
+      targetPort: 3000
+      protocol: TCP
+  type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      nodeSelector:
+        node-group: eks-grafana
+      containers:
+        - name: grafana
+          image: grafana/grafana:8.5.13
+          ports:
+            - containerPort: 3000
+          env:
+            - name: GF_DASHBOARDS_MIN_REFRESH_INTERVAL
+              value: "1s"
+          volumeMounts:
+            - name: grafana-data
+              mountPath: /var/lib/grafana
+            - name: grafana-datasource
+              mountPath: /etc/grafana/provisioning/datasources/datasource.yml
+              subPath: datasource.yml
+      volumes:
+        - name: grafana-datasource
+          configMap:
+            name: grafana-datasource-config
+        - name: grafana-data
+          emptyDir: {}  # Replace with PVC if persistent storage is required
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasource-config
+  namespace: prod
+data:
+  datasource.yml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.prod.svc.cluster.local:9090
+        isDefault: true
