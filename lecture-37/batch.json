@@ -1,0 +1,24 @@
+{
+    "lecture-37": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "userId": {"S": "u12345"},
+                    "email": {"S": "user@example.com"},
+                    "name": {"S": "John Doe"},
+                    "phoneNumber": {"S": "+1-123-456-7890"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "userId": {"S": "u67890"},
+                    "email": {"S": "jane@example.com"},
+                    "name": {"S": "Jane Smith"},
+                    "phoneNumber": {"S": "+1-987-654-3210"}
+                }
+            }
+        }
+    ]
+}
